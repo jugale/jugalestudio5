@@ -10,10 +10,23 @@
   <link href='https://api.mapbox.com/mapbox-gl-js/v1.11.1/mapbox-gl.css' rel='stylesheet'/>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@5/turf.min.js"></script>
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-    }
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  h1 {
+    font-size: 28px;
+    color: #577489;
+  }
+  h2 {
+    font-size: 18px;
+    color: #666666;
+  }
+  h4 {
+    font-size: 10px;
+    font-style: italic;
+    color: #a1a1a1;
+  }
 
     #map {
       position: absolute;
@@ -22,24 +35,62 @@
       width: 100%;
     }
     #instructions {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      background-color: #fff;
+      height: 100%; /* Full-height: remove this if you want "auto" height */
+      width: 252px; /* Set the width of the sidebar */
+      position: absolute; /* Fixed Sidebar (stay in place on scroll) */
+      z-index: 1; /* Stay on top */
+      top: 0; /* Stay at the top */
+      right: 0;
+      background-color: #fff; /* Black */
+      overflow-x: hidden; /* Disable horizontal scroll */
       padding: 5px 20px 5px 20px;
       border-radius: 10px;
       font-family: Lato, sans-serif;
     }
 
+      .map-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      background: rgba(255, 255, 255, 0.8);
+      margin-left: 20px;
+      font-family: Arial, sans-serif;
+      overflow: auto;
+      border-radius: 3px;
+    }
+
+
+    #legend {
+      padding: 10px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      line-height: 18px;
+      height: 40px;
+      margin-bottom: 40px;
+      width: 200px;
+    }
+
+    .legend-key {
+      display: inline-block;
+      border-radius: 20%;
+      width: 10px;
+      height: 10px;
+      margin-right: 5px;
+    }
   </style>
+
 </head>
 
 <body>
   <div id="map"></div>
   <div id="instructions">
-    <h2>🚰 Instructions</h2>
-    <p>Click anywhere on the map to see water sites within a 500m radius. Stand alone water sites will be highlighted in red.</p>
+    <h1>Water Distribution in Zaatari, Jordan </h1>
+    <p> The Zaatari Refugee Camp located in Northern Jordan, as of April 30th 2021, is home to 79,208 refugees. Zaatari camp is under joint administration by the Syrian Refugee Affiars directorate, and the United Nations High Commissioner for Refugees. You can learn more about Zaatari <a href="https://data2.unhcr.org/en/situations/syria/location/53">here</a>.</p>
+    <img src="zaatari.jpeg" alt="Zaatari" style="width:250px;height: 141;">
+      <h4>Drone image of Zaatari Refugee Camp 18 Jun 2020 <a href="https://www.unhcr.org/jo/13317-1-per-cent-of-humanity-displaced-unhcr-global-trends-report.html/jordan-zaatari-camp">image credit</a>.<h4>
+    <h2>🚰 <u>Instructions</u></h2>
+   <p>Click anywhere on the map to see water sites within a 500m radius. Stand alone water sites will be highlighted in red.</p>
   </div>
+  <div class='map-overlay' id='legend'></div>
   <script>
     // Data showing water points - replace the dummy URL with your own.
     var url = 'https://raw.githubusercontent.com/jugale/jugalestudio5/main/zaatariwater.geojson'
@@ -48,9 +99,9 @@
     mapboxgl.accessToken = 'pk.eyJ1IjoianVnYWxlIiwiYSI6ImNrbGgxcHhocTIwYmoycG8zaWZyNWdxZGcifQ.-fq6WKH7k2YnRhF9lxn3Fg';
     var map = new mapboxgl.Map({
       container: 'map',
-      style: 'mapbox://styles/mapbox/satellite-v9', // imagery basemap - you may choose something else
-      center: [36.3295, 32.2963], // starting position at Zaatari Camp
-      zoom: 14, // starting zoom
+      style: 'mapbox://styles/jugale/ckod7db2q2huo17ryhhw3vgmg', // imagery basemap - you may choose something else
+      center: [36.335120, 32.292436], // starting position at Zaatari Camp
+      zoom: 13.86, // starting zoom
     });
 
     map.on('load', function () {
@@ -64,10 +115,10 @@
         },
         type: 'circle',
         paint: {
-          'circle-color': '#83e8fc',
-          'circle-radius': 3,
-          'circle-opacity': 1,
-          'circle-stroke-width': 1,
+          'circle-color': '#1690f5',
+          'circle-radius': 2.5,
+          'circle-opacity': 0.5,
+          'circle-stroke-width': .5,
           'circle-stroke-color': '#0557fa',
         }
       });
@@ -92,12 +143,30 @@
           type: 'geojson',
           data: { "type": "FeatureCollection", "features": [] }
         },
-        type: 'fill',
+        type: 'line',
         paint: {
-          'fill-color': '#fcf683',
-          'fill-opacity': 0.5
+          'line-width': 2,
+          'line-opacity': 0.5,
+          'line-color': '#424242',
         }
       });
+
+      var layers = ['Water sites','Stand alone water sites']
+      var colors = ['#1690f5','red']
+      for (i = 0; i < layers.length; i++) {
+      var layer = layers[i];
+      var color = colors[i];
+      var item = document.createElement('div');
+      var key = document.createElement('span');
+      key.className = 'legend-key';
+      key.style.backgroundColor = color;
+
+      var value = document.createElement('span');
+      value.innerHTML = layer;
+      item.appendChild(key);
+      item.appendChild(value);
+      legend.appendChild(item);
+    }
     });
       // Draw the search radius on the map
 
@@ -129,6 +198,8 @@
 
       return joined;
     };
+
+
   </script>
 
 </body>
